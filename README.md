@@ -1,6 +1,7 @@
 # Brightwheel
 
 ### Dependencies
+
 - cd brightwheel-exercise
 - npm -v
 - node -v
@@ -15,3 +16,25 @@ http://localhost:3000/api/
 ### Run tests
 
 > npm test
+
+### Endpoints
+
+GET /api/devices
+
+Lists reading information for all devices
+
+GET /api/devices/:deviceId
+
+Gets reading information for specified device
+
+POST /api/devices
+
+Update reading information for specified device
+
+GET /api/devices/:deviceId/count
+
+Gets cumulative count for specified device
+
+GET /api/devices/:deviceId/latest
+
+Gets latest reading for specified device

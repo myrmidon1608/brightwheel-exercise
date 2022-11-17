@@ -26,6 +26,14 @@ app.get('/api/devices/:deviceId', [
     DeviceService.getDeviceById
 ]);
 
+app.get('/api/devices/:deviceId/count', [
+    DeviceService.getDeviceCountById
+]);
+
+app.get('/api/devices/:deviceId/latest', [
+    DeviceService.getDeviceLatestById
+]);
+
 app.listen(port, function () {
     console.log('Listening on port ' + port);
 });
