@@ -1,7 +1,8 @@
 let DeviceRepository = require('../repository/DeviceRepository');
+let DeviceValidationService = require('./DeviceValidationService');
 
 exports.getDeviceById = (req, res) => {
-    if (!validId(req.params.deviceId)) {
+    if (!DeviceValidationService.validId(req.params.deviceId)) {
         return res.status(400).send({ error: "Invalid id" });
     }
     DeviceRepository.get(req.params.deviceId).then((result) => {
@@ -10,7 +11,7 @@ exports.getDeviceById = (req, res) => {
 };
 
 exports.getDeviceCountById = (req, res) => {
-    if (!validId(req.params.deviceId)) {
+    if (!DeviceValidationService.validId(req.params.deviceId)) {
         return res.status(400).send({ error: "Invalid id" });
     }
     DeviceRepository.getCount(req.params.deviceId).then((result) => {
@@ -19,7 +20,7 @@ exports.getDeviceCountById = (req, res) => {
 };
 
 exports.getDeviceLatestById = (req, res) => {
-    if (!validId(req.params.deviceId)) {
+    if (!DeviceValidationService.validId(req.params.deviceId)) {
         return res.status(400).send({ error: "Invalid id" });
     }
     DeviceRepository.getLatest(req.params.deviceId).then((result) => {
@@ -39,13 +40,16 @@ exports.setDevice = async (req, res) => {
     }
 
     let deviceId = req.body.id;
-    if (!validId(deviceId)) {
+    if (!DeviceValidationService.validId(deviceId)) {
         return res.status(400).send({ error: "Invalid id" });
     }
+    
     let deviceReadings = req.body.readings;
-    // TODO: check for malformed readings
+    if (!DeviceValidationService.validReadings(deviceReadings)) {
+        return res.status(400).send({ error: "Invalid readings" });
+    }
 
-    if (!await DeviceRepository.validateRequest(req.body)) {
+    if (!await DeviceValidationService.validRequest(req.body)) {
         return res.status(400).send({ error: "Duplicate request" });
     }
 
@@ -53,12 +57,3 @@ exports.setDevice = async (req, res) => {
         res.status(200).send(result);
     });
 };
-
-const isHEX = (ch) => "0123456789abcdef".includes(ch.toLowerCase());
-function validId(guid) {
-    if (!guid) {
-        return false;
-    }
-    guid = guid.replaceAll("-", "");
-    return guid.length === 32 && [...guid].every(isHEX);
-}

@@ -16,12 +16,10 @@
     }
  */
 
-const cs = require('checksum');
+let DeviceValidationService = require('../services/DeviceValidationService');
 const db = require('node-persist');
 const devices = db.create({dir: 'devices'});
 devices.init();
-const checksum = db.create({dir: 'checksum'});
-checksum.init();
 
 exports.get = (deviceId) => {
     return new Promise(async (resolve, reject) => {
@@ -33,14 +31,14 @@ exports.get = (deviceId) => {
 exports.getCount = (deviceId) => {
     return new Promise(async (resolve, reject) => {
         let device = await devices.get(deviceId);
-        resolve({ count: device.count });
+        resolve(device ? { count: device.count } : {});
     });
 };
 
 exports.getLatest = (deviceId) => {
     return new Promise(async (resolve, reject) => {
         let device = await devices.get(deviceId);
-        resolve(device.latestReading);
+        resolve(device ? device.latestReading : {});
     });
 };
 
@@ -55,6 +53,10 @@ exports.set = (deviceId, deviceReadings) => {
         let newReadingCount = 0;
         let latestReading;
         deviceReadings.forEach(element => {
+            if (!element.count || !element.timestamp) {
+                return;
+            }
+
             newReadingCount += element.count;
             if (!latestReading) {
                 latestReading = element;
@@ -72,6 +74,7 @@ exports.set = (deviceId, deviceReadings) => {
             if (latestReading.timestamp > device.latestReading.timestamp) {
                 device.latestReading = latestReading;
             }
+            device.readings = deviceReadings;
         } else {
             device = {
                 id: deviceId,
@@ -89,14 +92,4 @@ exports.set = (deviceId, deviceReadings) => {
 // Internal
 exports.clear = () => {
     devices.clear();
-    checksum.clear();
-}
-
-exports.validateRequest = async (body) => {
-    let curChecksum = cs(JSON.stringify(body));
-    if (await checksum.get(curChecksum)) {
-        return false;
-    }
-    await checksum.set(curChecksum, JSON.stringify(body));
-    return true;
 }

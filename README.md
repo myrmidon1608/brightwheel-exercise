@@ -38,3 +38,10 @@ Gets cumulative count for specified device
 GET /api/devices/:deviceId/latest
 
 Gets latest reading for specified device
+
+### TODO
+
+- Add better validation for malformed readings
+- Clean up error handling
+- Incorporate class-based typing for readings
+- Better storage handling (persistence, etc)
